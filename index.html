@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>GPT4 API V1 Title</title>
+    <!--<link rel="stylesheet" href="./style.css">-->
+    <style>
+        /* Add your custom styles here */
+        body {
+          font-family: Arial, sans-serif;
+        }
+        h1 {
+          text-align: center;
+        }
+        .container {
+          width: 600px;
+          margin: 0 auto;
+        }
+        .textbox {
+          width: 75%;
+          margin-bottom: 10px;
+        }
+        #result {
+          width: 75%;
+          height: 100px;
+        }
+      </style>
+<!---------------------------------------------------------------------------->
+<link rel="icon" href="./favicon.ico" type="image/x-icon">
+  </head>
+  <body>
+    <main>
+        <!-- Title -->
+        <h1>Sum it™</h1>
+        <!-- Message input form -->
+        <form action="">
+            <input type="text" class="textbox" name="input1-Name" id="input1-Id" placeholder="Premises">
+            <input type="text" class="textbox" name="input2-Name" id="input2-Id" placeholder="Data">
+            <input type="text" class="textbox" name="input3-Name" id="input3-Id" placeholder="Sources">
+            <textarea type="text" name="message" class="textbox" id="result" placeholder="Result"></textarea>
+            <br>
+            <button type="submit" onclick="generateResult()">Sum It!</button>
+        </form>  
+        <!-- Chat log container -->
+        <div id="chat-log">
+
+        </div>
+    </main>
+<!---------------------------------------------------------------------------->
+<script>
+
+      function generateResult() {
+      // Get input values from textboxes
+      const input1 = document.getElementById('input1-Id').value;
+      const input2 = document.getElementById('input2-Id').value;
+      const input3 = document.getElementById('input3-Id').value;
+
+      // Combine user input and random sentences
+      const result = `${"Premise 1: "} ${input1_Id} ${"Premise 2: "} ${input2_Id} ${"Premise 3: "} ${input3_Id}`;
+
+      // Display the result in the large textbox
+      document.getElementById('result').value = result;
+    }
+        function processInputs(){
+        let messages = []
+        // Get references to elements in the DOM
+        const chatLog = document.getElementById('chat-log'); 
+        const message = document.getElementById('result');
+        const form = document.querySelector('form');
+
+        // Add submit event listener to form
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const messageText = message.value; // User's input
+            const newMessage = {"role": "user", "content": `${messageText}`}
+            messages.push(newMessage) // Add message to array
+            message.value = '';
+            // Create a new message element for the sent message
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('result');
+            messageElement.classList.add('message--sent');
+            messageElement.innerHTML = `
+                <div class="message__text"> ${messageText} </div>
+            `;
+
+            // Append the sent message element to the chat log
+            chatLog.appendChild(messageElement);
+            chatLog.scrollTop = chatLog.scrollHeight;
+
+            // Send the message to the server
+            fetch('http://localhost:3000', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    messages // Update the message being sent to the server
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                // Update the messages history when response comes back from server
+                let newAssistantMessage = {"role": "assistant", "content": `${data.completion.content}`}
+                messages.push(newAssistantMessage)
+                // Create a new message element for the received message
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('result');
+                messageElement.classList.add('message--received');
+                messageElement.innerHTML = `
+                    <div class="message__text"> ${data.completion.content} </div>
+                `;
+
+                // Append the received message element to the chat log
+                chatLog.appendChild(messageElement);
+                chatLog.scrollTop = chatLog.scrollHeight;
+            })
+        })
+    }
+    </script>
+  </body>
+</html>
